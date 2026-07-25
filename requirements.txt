@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pdf2docx
+pdfplumber
+pandas
+openpyxl
+python-pptx
+pdf2image
