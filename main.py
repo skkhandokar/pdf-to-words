@@ -69,17 +69,37 @@ async def convert_file(
             all_tables = []
             with pdfplumber.open(input_path) as pdf:
                 for page in pdf.pages:
+                    # ১. প্রথমে সাধারণ বর্ডারযুক্ত টেবিল খোঁজা
                     extracted = page.extract_tables()
-                    for table in extracted:
-                        if table and len(table) > 1:
-                            df = pd.DataFrame(table[1:], columns=table[0])
-                            all_tables.append(df)
+                    
+                    if extracted:
+                        for table in extracted:
+                            if table and len(table) > 1:
+                                df = pd.DataFrame(table[1:], columns=table[0])
+                                all_tables.append(df)
+                    else:
+                        # ২. যদি বর্ডার না থাকে, তবে টেক্সটের পজিশন বা লাইন ধরে এক্সট্রাক্ট করা (Implicit Table)
+                        text_lines = page.extract_text()
+                        if text_lines:
+                            lines_data = []
+                            for line in text_lines.split('\n'):
+                                # স্পেস বা ট্যাব অনুযায়ী কলাম আলাদা করা
+                                cols = line.split()
+                                if cols:
+                                    lines_data.append(cols)
+                            
+                            if len(lines_data) > 1:
+                                # প্রথম লাইনকে হেডার এবং বাকিগুলোকে রো হিসেবে ধরা
+                                max_cols = max(len(row) for row in lines_data)
+                                normalized_rows = [row + [''] * (max_cols - len(row)) for row in lines_data]
+                                df = pd.DataFrame(normalized_rows[1:], columns=normalized_rows[0])
+                                all_tables.append(df)
             
             if all_tables:
                 final_df = pd.concat(all_tables, ignore_index=True)
                 final_df.to_excel(output_path, index=False)
             else:
-                pd.DataFrame([{"Message": "No tables detected"}]).to_excel(output_path, index=False)
+                pd.DataFrame([{"Message": "No tabular data detected in this PDF"}]).to_excel(output_path, index=False)
 
         # ==========================================
         # ৪. PDF to PowerPoint (.pptx)
