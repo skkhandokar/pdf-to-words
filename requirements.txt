@@ -7,3 +7,7 @@ pandas
 openpyxl
 python-pptx
 pdf2image
+pytesseract 
+pillow 
+reportlab 
+openpyxl
