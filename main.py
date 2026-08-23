@@ -150,7 +150,6 @@
 
 
 
-
 import os
 import shutil
 import tempfile
@@ -178,7 +177,7 @@ app = FastAPI(
 # Next.js Frontend কানেক্ট করার জন্য CORS চালুকরণ
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Production-এ নির্দিষ্ট Next.js URL দিতে পারেন
+    allow_origins=["*"],  # Production-এ নির্দিষ্ট Next.js URL দিতে পারেন
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -191,7 +190,7 @@ def home():
 @app.post("/api/convert/")
 async def convert_file(
     file: UploadFile = File(...),
-    conversion_type: str = Form(...) # 'pdf-to-word', 'pdf-to-excel', 'pdf-to-ppt', 'office-to-pdf', 'image-to-excel'
+    conversion_type: str = Form(...)  # 'pdf-to-word', 'pdf-to-excel', 'pdf-to-ppt', 'office-to-pdf', 'image-to-excel'
 ):
     # ১. অস্থায়ী (Temp) ডিরেক্টরি ও ফাইল তৈরি
     temp_dir = tempfile.mkdtemp()
@@ -293,7 +292,7 @@ async def convert_file(
             output_path = os.path.join(temp_dir, "converted.xlsx")
             download_filename = "image_converted.xlsx"
 
-            # Step 1: Image to Text (OCR)
+            # Step 1: Image to Text (OCR via Tesseract in Docker)
             img = Image.open(input_path)
             extracted_text = pytesseract.image_to_string(img)
 
